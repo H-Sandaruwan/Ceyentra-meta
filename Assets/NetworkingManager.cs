@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using Cysharp.Threading.Tasks;
+using Algorand;
+using Algorand.Unity;
+using UnityEngine.SceneManagement;
 
 public class NetworkingManager : MonoBehaviour
 {
@@ -21,7 +25,11 @@ public class NetworkingManager : MonoBehaviour
     public InputField loginEmailInputField;
     public InputField loginPasswordInputField;
 
-    // Start is called before the first frame update
+    //Algorand account
+    public Account account;
+    public MicroAlgos balance;
+
+    // Start is called before the first frame update 
     void Start()
     {
         instance = this;
@@ -42,9 +50,6 @@ public class NetworkingManager : MonoBehaviour
             Password = passwordInputField.text,
             password_confirmation = confirmPasswordInputField.text
         };
-        Debug.Log("Email :" + emailInputFeild.text);
-        Debug.Log("Password :" + passwordInputField.text);
-        Debug.Log("Password Config :" + confirmPasswordInputField.text);
 
         Debug.Log(tempReg.ToString());
         StartCoroutine(Register(tempReg));
@@ -67,10 +72,10 @@ public class NetworkingManager : MonoBehaviour
         Debug.Log(values.ToString());
         Debug.Log(JsonUtility.ToJson(values,true));
         {
-    "Email": "jkl@mal.com",
-    "Password": "Asd@12",
-    "password_confirmation": "Asd@12"
-}*/
+            "Email": "jkl@mal.com",
+            "Password": "Asd@12",
+            "password_confirmation": "Asd@12"
+        }*/
 
         var uwr = new UnityWebRequest("https://unitybackend120230310135845.azurewebsites.net/api/Account/Register", "POST");
         string jsonData = JsonUtility.ToJson(register, true);
@@ -85,13 +90,18 @@ public class NetworkingManager : MonoBehaviour
 
         yield return uwr.SendWebRequest();
 
-        if(uwr.result == UnityWebRequest.Result.ConnectionError)
+        if (uwr.result == UnityWebRequest.Result.ConnectionError)
         {
             Debug.Log("Error :" + uwr.error);
         }
         else
         {
+            account = Account.GenerateAccount();
+            Debug.Log(
+                "Account Address :" + account.Address.ToString() + "\n" +
+                "Account Balance :" + balance.Amount.ToString());
             Debug.Log(uwr.downloadHandler.text);
+            SceneManager.LoadScene("SampleScene");
         }
     }
 
